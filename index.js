@@ -2,6 +2,7 @@ import express from "express";
 import puppeteer from "puppeteer";
 
 const app = express();
+app.get("/health", (req, res) => res.send("ok"));
 
 app.get("/", (req, res) => {
   res.send("🚀 Server Puppeteer Render hoạt động!");
