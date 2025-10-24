@@ -34,8 +34,10 @@ app.get("/screenshot", async (req, res) => {
     // 🕐 Truy cập URL
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
-    // ⏳ Đợi trang load hoàn toàn (nếu có ảnh động, hiệu ứng...)
-    await page.waitForTimeout(5000); // đợi 5s
+
+     // ✅ Đợi 10 giây cho trang load/render hoàn tất
+    console.log("⏳ Đang đợi trang load đầy đủ (10 giây)...");
+    await new Promise(resolve => setTimeout(resolve, 10000));
 
     // 💬 Thêm CSS để đảm bảo font chữ hiển thị rõ
     await page.addStyleTag({
