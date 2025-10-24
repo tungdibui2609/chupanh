@@ -1,33 +1,43 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+// index.js
+import express from "express";
+import puppeteer from "puppeteer";
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
 
-app.post('/screenshot', async (req, res) => {
-  const { url } = req.body;
-  if (!url || typeof url !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid url' });
-  }
-  let browser;
+// Trang test để kiểm tra server có chạy không
+app.get("/", (req, res) => {
+  res.send("🚀 Server Puppeteer đang chạy thành công trên Render!");
+});
+
+// API chính: /screenshot?url=https://example.com
+app.get("/screenshot", async (req, res) => {
   try {
-    browser = await puppeteer.launch({ headless: 'new' });
+    const targetUrl = req.query.url;
+    if (!targetUrl) {
+      return res.status(400).send("Thiếu tham số ?url=");
+    }
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"], // bắt buộc cho Render
+    });
+
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-    const screenshot = await page.screenshot({ fullPage: true, type: 'png' });
-    res.set('Content-Type', 'image/png');
-    res.send(screenshot);
+    await page.goto(targetUrl, { waitUntil: "networkidle0" });
+
+    // Chụp toàn bộ trang
+    const buffer = await page.screenshot({ fullPage: true });
+
+    await browser.close();
+
+    res.setHeader("Content-Type", "image/png");
+    res.send(buffer);
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  } finally {
-    if (browser) await browser.close();
+    console.error(err);
+    res.status(500).send("Lỗi khi chụp ảnh trang web");
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+// Render sẽ cung cấp biến PORT, phải dùng cái này
+const port = process.env.PORT || 10000;
+app.listen(port, () => console.log(`✅ Server Puppeteer chạy tại cổng ${port}`));
