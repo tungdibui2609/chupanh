@@ -1,12 +1,11 @@
 {
   "name": "chupanh",
   "version": "1.0.0",
-  "description": "Server chụp ảnh website bằng Puppeteer trên Render",
+  "description": "API chụp ảnh website bằng Puppeteer trên Render",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "install": "npx puppeteer browsers install chrome",
-    "start": "node index.js"
+    "start": "./render-build.sh"
   },
   "dependencies": {
     "express": "^4.18.2",

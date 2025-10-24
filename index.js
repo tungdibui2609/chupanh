@@ -4,7 +4,7 @@ import puppeteer from "puppeteer";
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("🚀 Server Puppeteer đang chạy thành công trên Render!");
+  res.send("🚀 Server Puppeteer trên Render hoạt động!");
 });
 
 app.get("/screenshot", async (req, res) => {
@@ -18,14 +18,18 @@ app.get("/screenshot", async (req, res) => {
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
-        "--single-process",
+        "--disable-gpu",
         "--no-zygote",
+        "--single-process",
       ],
     });
 
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
-    const buffer = await page.screenshot({ type: "png" });
+
+    // Chụp ảnh toàn trang
+    const buffer = await page.screenshot({ fullPage: true, type: "png" });
+
     await browser.close();
 
     res.setHeader("Content-Type", "image/png");
