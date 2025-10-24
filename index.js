@@ -67,7 +67,7 @@ app.get("/screenshot", async (req, res) => {
     // Chụp đến phần QR
     let buffer;
     if (qrBottom && Number.isFinite(qrBottom)) {
-      const padding = 80;
+      const padding = 35;
       const desiredHeight = Math.min(qrBottom + padding, 8000);
       const vp = page.viewport() || { width: 1240, height: 1754, deviceScaleFactor: 2 };
       await page.setViewport({
