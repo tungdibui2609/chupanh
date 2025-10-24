@@ -25,24 +25,30 @@ app.get("/screenshot", async (req, res) => {
     });
 
     const page = await browser.newPage();
+
+    // 📏 Kích thước khổ A4 ở 300 DPI: 2480 x 3508 px
+    await page.setViewport({
+      width: 2480,
+      height: 3508,
+      deviceScaleFactor: 2, // tăng chất lượng hình
+    });
+
     console.log(`🌐 Đang mở trang: ${url}`);
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
     console.log("⏳ Đang đợi trang load đầy đủ (10 giây)...");
     await new Promise(resolve => setTimeout(resolve, 10000));
 
-    // ✅ Xuất ra file PDF khổ A4, chất lượng cao
-    const buffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      preferCSSPageSize: true,
-      scale: 1,
+    // ✅ Chụp ảnh khổ A4, chất lượng cao
+    const buffer = await page.screenshot({
+      type: "jpeg",
       quality: 100,
+      clip: { x: 0, y: 0, width: 2480, height: 3508 },
     });
 
     await browser.close();
 
-    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Type", "image/jpeg");
     res.send(buffer);
 
   } catch (error) {
