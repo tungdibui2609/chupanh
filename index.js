@@ -25,14 +25,26 @@ app.get("/screenshot", async (req, res) => {
     });
 
     const page = await browser.newPage();
+
+    // ✅ Đặt viewport lớn và độ nét cao
+    await page.setViewport({
+      width: 1920,          // hoặc 2560 cho 2K
+      height: 1080,
+      deviceScaleFactor: 2, // tăng độ nét ảnh gấp đôi
+    });
+
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
-    // Chụp ảnh toàn trang
-    const buffer = await page.screenshot({ fullPage: true, type: "png" });
+    // ✅ Chụp ảnh toàn trang với chất lượng cao
+    const buffer = await page.screenshot({
+      fullPage: true,
+      type: "jpeg",   // hoặc "png" nếu bạn muốn giữ nền trong suốt
+      quality: 100,   // 0–100, ảnh rõ nét nhất
+    });
 
     await browser.close();
 
-    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Content-Type", "image/jpeg");
     res.send(buffer);
   } catch (error) {
     console.error("❌ Lỗi Puppeteer:", error);
