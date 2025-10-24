@@ -1,12 +1,3 @@
-import express from "express";
-import puppeteer from "puppeteer";
-
-const app = express();
-
-app.get("/", (req, res) => {
-  res.send("🚀 Server Puppeteer đang hoạt động!");
-});
-
 app.get("/screenshot", async (req, res) => {
   const url = req.query.url;
   if (!url) return res.status(400).send("Thiếu tham số ?url=");
@@ -26,7 +17,7 @@ app.get("/screenshot", async (req, res) => {
 
     const page = await browser.newPage();
 
-    // 📏 Khổ A4 tỷ lệ đúng, thu nhỏ 150 DPI
+    // Khổ A4, 150 DPI
     await page.setViewport({
       width: 1240,
       height: 1754,
@@ -36,14 +27,21 @@ app.get("/screenshot", async (req, res) => {
     console.log(`🌐 Mở trang: ${url}`);
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
-    console.log("⏳ Đang đợi load (5 giây)...");
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // Đợi font Roboto load xong
+    await page.evaluate(async () => {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+    });
+    // Đợi thêm 300ms cho layout ổn định
+    await new Promise(r => setTimeout(r, 300));
 
-    // ✅ Chụp ảnh khổ A4, chất lượng cao
+    // Chụp fullPage hoặc khổ A4 tuỳ ý
     const buffer = await page.screenshot({
       type: "jpeg",
       quality: 90,
-      clip: { x: 0, y: 0, width: 1240, height: 1754 },
+      fullPage: true, // hoặc dùng clip nếu muốn cố định A4
+      // clip: { x: 0, y: 0, width: 1240, height: 1754 },
     });
 
     await browser.close();
@@ -56,6 +54,3 @@ app.get("/screenshot", async (req, res) => {
     res.status(500).send("Lỗi khi chụp ảnh trang web");
   }
 });
-
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`✅ Server chạy tại cổng ${PORT}`));
