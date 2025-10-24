@@ -4,7 +4,7 @@ import puppeteer from "puppeteer";
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("🚀 Server Puppeteer trên Render hoạt động!");
+  res.send("🚀 Server Puppeteer đang hoạt động!");
 });
 
 app.get("/screenshot", async (req, res) => {
@@ -26,24 +26,24 @@ app.get("/screenshot", async (req, res) => {
 
     const page = await browser.newPage();
 
-    // 📏 Kích thước khổ A4 ở 300 DPI: 2480 x 3508 px
+    // 📏 Khổ A4 tỷ lệ đúng, thu nhỏ 150 DPI
     await page.setViewport({
-      width: 2480,
-      height: 3508,
-      deviceScaleFactor: 2, // tăng chất lượng hình
+      width: 1240,
+      height: 1754,
+      deviceScaleFactor: 2,
     });
 
-    console.log(`🌐 Đang mở trang: ${url}`);
+    console.log(`🌐 Mở trang: ${url}`);
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
-    console.log("⏳ Đang đợi trang load đầy đủ (10 giây)...");
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    console.log("⏳ Đang đợi load (5 giây)...");
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // ✅ Chụp ảnh khổ A4, chất lượng cao
     const buffer = await page.screenshot({
       type: "jpeg",
-      quality: 100,
-      clip: { x: 0, y: 0, width: 2480, height: 3508 },
+      quality: 90,
+      clip: { x: 0, y: 0, width: 1240, height: 1754 },
     });
 
     await browser.close();
