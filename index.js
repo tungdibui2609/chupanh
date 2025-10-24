@@ -26,28 +26,37 @@ app.get("/screenshot", async (req, res) => {
 
     const page = await browser.newPage();
 
-    // 📏 Khổ A4 thu nhỏ (1240x1754px ~150 DPI)
+    // Khổ A4, 150 DPI
     await page.setViewport({
       width: 1240,
       height: 1754,
       deviceScaleFactor: 2,
     });
 
-    console.log(`🌐 Đang mở trang: ${url}`);
+    console.log(`🌐 Mở trang: ${url}`);
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
-    // ⏳ Đợi font load xong
+    // 🧩 Thêm font Roboto từ Google Fonts thủ công
+    await page.addStyleTag({
+      content: `
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        * { font-family: 'Roboto', sans-serif !important; }
+      `,
+    });
+
+    // Đợi font load
     await page.evaluate(async () => {
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
       }
     });
+
+    // Đợi thêm cho layout ổn định
     await new Promise(r => setTimeout(r, 300));
 
-    // 📸 Chụp ảnh
     const buffer = await page.screenshot({
       type: "jpeg",
-      quality: 90,
+      quality: 95,
       fullPage: true,
     });
 
