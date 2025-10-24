@@ -1,5 +1,7 @@
 {
   "name": "chupanh",
+  "version": "1.0.0",
+  "description": "Dịch vụ chụp ảnh website bằng Puppeteer chạy trên Render",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -8,5 +10,8 @@
   "dependencies": {
     "express": "^4.18.2",
     "puppeteer": "^22.10.0"
+  },
+  "engines": {
+    "node": ">=18.x"
   }
 }
