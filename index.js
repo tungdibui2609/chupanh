@@ -4,7 +4,7 @@ import puppeteer from "puppeteer";
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("🚀 Server Puppeteer trên Render hoạt động!");
+  res.send("🚀 Server Puppeteer chụp ảnh khổ A4 hoạt động!");
 });
 
 app.get("/screenshot", async (req, res) => {
@@ -12,6 +12,8 @@ app.get("/screenshot", async (req, res) => {
   if (!url) return res.status(400).send("Thiếu tham số ?url=");
 
   try {
+    console.log("🌐 Đang mở trang:", url);
+
     const browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -26,35 +28,38 @@ app.get("/screenshot", async (req, res) => {
 
     const page = await browser.newPage();
 
-    await page.setViewport({
-      width: 1920,
-      height: 1080,
-      deviceScaleFactor: 2,
-    });
+    // ⚙️ Đặt kích thước khổ A4 (96 DPI)
+    await page.setViewport({ width: 794, height: 1123 });
 
-    console.log(`🌐 Đang mở trang: ${url}`);
+    // 🕐 Truy cập URL
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
-    // ✅ Đợi 10 giây cho trang load/render hoàn tất
-    console.log("⏳ Đang đợi trang load đầy đủ (10 giây)...");
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    // ⏳ Đợi trang load hoàn toàn (nếu có ảnh động, hiệu ứng...)
+    await page.waitForTimeout(5000); // đợi 5s
 
-    // ✅ Cuộn xuống cuối trang để load hết nội dung
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // 💬 Thêm CSS để đảm bảo font chữ hiển thị rõ
+    await page.addStyleTag({
+      content: `
+        body {
+          font-family: 'Roboto', 'Arial', sans-serif !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      `,
+    });
 
-    // ✅ Chụp ảnh toàn trang, chất lượng cao
+    // 📸 Chụp ảnh khổ A4, không chụp toàn trang
     const buffer = await page.screenshot({
-      fullPage: true,
-      type: "jpeg",
-      quality: 100,
+      type: "png",
+      fullPage: false,
+      captureBeyondViewport: false,
+      omitBackground: false,
     });
 
     await browser.close();
 
-    res.setHeader("Content-Type", "image/jpeg");
+    res.setHeader("Content-Type", "image/png");
     res.send(buffer);
-
   } catch (error) {
     console.error("❌ Lỗi Puppeteer:", error);
     res.status(500).send("Lỗi khi chụp ảnh trang web");
